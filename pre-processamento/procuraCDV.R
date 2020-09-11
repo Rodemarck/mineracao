@@ -2,21 +2,8 @@ magia_negra <- function(descricao, cmt="HACK"){
     if(is.null(descricao)){
         return(NULL)
     }
-    x <- NULL
     d <- str_replace_all(descricao,pattern = "\\s+",replacement = "")
-    ids <- str_extract_all(string = d,pattern="[1-3](\\-|\\.|\\:|\\;|\\,)?[S|N](\\-|\\.|\\:|\\;|\\,)??[01](\\-|\\.|\\:|\\;|\\,)?[0-9](\\-|\\.|\\:|\\;|\\,)?($|T$|T[^T])?")
-    if(!is.null(ids) & length(ids[[1]]) !=0){
-        for(id in ids){
-            print(id)
-            id <- str_replace_all(string = id,pattern = "(\\-|\\.|\\:|\\;|\\,)", replacement = "")
-            if(grepl("T[^T]$",id)){
-                id <- substr(id,1,length(id)-1)
-            }else if(grepl("[^T]$",id)){
-                id <- paste(id,"T",sep = "")
-            }
-            x <- c(x,id)
-        }
-    }
+    ids <- str_extract_all(string = d,pattern="[1-3](\\-|\\.|\\:|\\;|\\,)*[S|N](\\-|\\.|\\:|\\;|\\,)*[01](\\-|\\.|\\:|\\;|\\,)?[0-9](\\-|\\.|\\:|\\;|\\,)?($|T$|T[^T])")
     return(ids)
 }
 conjura <- function(dados){
@@ -25,7 +12,9 @@ conjura <- function(dados){
     k <- 1
     for(i in 1:nrow(dados)){
         aux <- magia_negra(dados$descrição[i])
-        
+        if(!is.null(aux)){
+            print(aux)
+        }
         if(!is.null(aux) & length(aux[[1]])!=0){
             print(aux[[1]])
             cdvs[k] <- list(cdvs=aux[[1]])
@@ -48,4 +37,4 @@ erro.cdvs <- function(erros){
     return(x)
 }
 
-#save(list = c("magia_negra","conjura","erro.cdvs"), file = "funcões/magia.RData")
+save(list = c("magia_negra","conjura","erro.cdvs"), file = "funcões/magia.RData")

@@ -1,7 +1,5 @@
-install.packages("rlang")
 library("stringr")
 library("rlang")
-load("funções/import.RData")
+load("./funcoes/import.RDAta")
 Metrô <- ler("METROREC.csv")
 erros <- conjura(Metrô)
-resultado <- erro.cdvs(erros)
