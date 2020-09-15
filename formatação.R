@@ -1,35 +1,37 @@
 #leitura e formatacao inicial
 ler <- function(x){
-    Metro <- as.data.frame(read.csv(x, check.names = F))
+    Metrô <- as.data.frame(read.csv(x, check.names = F))
     #nomeando colunas
-    names(Metro) <- c("solicitacao","localizacao","data_abertura","hora_abertura","data_falha","hora_falha","descricao","data_encerramento","hora_encerramento")
+    names(Metrô) <- c("solicitacao","localizacao","data_abertura","hora_abertura","data_falha","hora_falha","descricao","data_encerramento","hora_encerramento")
     #filtragem
-    Metro <- Metro[
+    Metrô <- Metrô[
         which(
-            Metro$descricao != "" & 
-                Metro$solicitacao != "Solicitacao" & 
-                Metro$data_abertura != "/  /" &
-                Metro$data_encerramento != "/  /" &
-                Metro$data_falha != "/  /" &
-                Metro$hora_abertura != ":" &
-                Metro$hora_encerramento != ":" &
-                Metro$hora_falha != ":"
+            Metrô$descricao != "" &
+                Metrô$solicitacao != "Solicitacao" &
+                Metrô$descricao != "Descricao" &
+                Metrô$data_abertura != "/  /" &
+                Metrô$data_encerramento != "/  /" &
+                Metrô$data_falha != "/  /" &
+                Metrô$hora_abertura != ":" &
+                Metrô$hora_encerramento != ":" &
+                Metrô$hora_falha != ":"
         )
         ,]
     #padronizacao
-    Metro$tempo_abertura <- as.POSIXlt(as.Date(paste(Metro$data_abertura, Metro$hora_abertura, sep = " "),"%m/%d/%Y"))
-    Metro$tempo_falha  <- as.POSIXlt(as.Date(paste(Metro$data_falha, Metro$hora_falha, sep = " "),"%m/%d/%Y"))
-    Metro$tempo_encerramento  <- as.POSIXlt(as.Date(paste(Metro$data_encerramento, Metro$hora_encerramento, sep = " "),"%m/%d/%Y"))
-    
+    a <- paste(Metrô$data_abertura, Metrô$hora_abertura, sep = " ")
+    b <- as.Date(a,"%m/%d/%Y #")
+    Metrô$tempo_abertura <- strptime(paste(Metrô$data_abertura, Metrô$hora_abertura, sep = " "), "%m/%d/%Y %H:%M")
+    Metrô$tempo_falha  <- strptime(paste(Metrô$data_falha, Metrô$hora_falha, sep = " "), "%m/%d/%Y %H:%M")
+    Metrô$tempo_encerramento  <- strptime(paste(Metrô$data_encerramento, Metrô$hora_encerramento, sep = " "), "%m/%d/%Y %H:%M")
+    Metrô$tempo_duracao <- Metrô$tempo_encerramento - Metrô$tempo_abertura
     #dropando colunas inuteis
-    Metro <- Metro[,-c(3,4,5,6,8,9)]
+    Metrô <- Metrô[,-c(3,4,5,6,8,9)]
     
-    Metro$descricao = str_replace_all(Metro$descricao, "\n", " ", fixed=T)
-    return(Metro)
+    Metrô$descricao = str_replace_all(Metrô$descricao, "\n", " ")
+    return(Metrô)
 }
 
 
-#constantes
 cdvs <- function(x,a,b){
     if(!x %in% c("RECS","NEV","CAJ")){
         x <- "HACK"
@@ -91,5 +93,6 @@ estacao <- function(x){
 CMTS <- c("RECS","NEV","CAJ")
 
 
-save(ler,file = "funcOes/ler.RData")
-save(list =c("cdvs","CMTS","cmt","ESTACOES","estacao"), file = "funcOes/constantes.RData")
+
+save(ler,file = "funcoes/ler.RData")
+save(list =c("cdvs","CMTS","cmt","ESTACOES","estacao"), file = "funcoes/constantes.RData")

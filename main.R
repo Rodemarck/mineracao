@@ -1,5 +1,11 @@
+rm(list = ls())
 library("stringr")
+library("tuple")
 library("rlang")
-load("./funcoes/import.RDAta")
+library("ggplot2")
+
+load("funcoes/import.RData")
+options(max.print=.Machine$integer.max)
 Metrô <- ler("METROREC.csv")
 erros <- conjura(Metrô)
+resultado <- processa(erros)

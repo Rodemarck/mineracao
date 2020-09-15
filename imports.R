@@ -1,8 +1,7 @@
 rm(list = ls())#
-load("funcoes/ler.RData")
-load("funcoes/constantes.RData")
-load("funcoes/magia.RData")
-
-
+for(f in list.files("funcoes")){
+    load(paste0("funcoes/",f))
+}
+rm(f)
 save(list = c(ls()),file = "funcoes/import.RData")
 
