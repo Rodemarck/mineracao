@@ -5,6 +5,7 @@ library("rlang")
 library("ggplot2")
 library("dplyr")
 library("tidyr")
+library("lubridate")
 
 options(max.print=.Machine$integer.max)
 
@@ -13,29 +14,37 @@ for(f in list.files("funcoes")){
 }
 
 rm(f)
-k <- read.csv(file = "metro_rec_tratado.csv")
-Metrô <- ler("METROREC.csv")
+#' lendo e processessando dados
+#Metrô <- ler("METROREC.csv")
+
 #' escrevendo tabela completa tratada
-write.csv(Metrô, file = "metro_rec_tratado.csv")
+#write.csv(Metrô, file = "metro_rec_tratado.csv")
 
-erros <- conjura(Metrô)
+#' lendo dados processados
+Metrô <- read.csv(file = "metro_rec_tratado.csv")[2:8]%>%
+  mutate(tempo_abertura=strptime(tempo_abertura, "%Y-%m-%d %H:%M:%S"),
+         tempo_falha=strptime(tempo_falha,  "%Y-%m-%d %H:%M:%S"),
+         tempo_encerramento=strptime(tempo_encerramento,  "%Y-%m-%d %H:%M:%S"),
+         t_d=tempo_duracao) %>%
+  select(c("solicitacao","localizacao","descricao","tempo_abertura","tempo_falha","tempo_encerramento","t_d")) %>%
+  mutate(tempo_duracao=duration(minute=t_d)) %>%
+  select(-c("t_d"))
+#' procurando erros dos cdvs
+#erros <- conjura(Metrô)
+#erros <- merge(Metrô,erros)
+
 #' escrevendo erros dos cdvs
-write.csv(erros, file = "erros_cdv.csv",na = "")
+#write.csv(erros, file = "erros_cdv.csv")
 
+#' lendo erros dos cdvs
+erros <- read.csv(file = "erros_cdv.csv",stringsAsFactors = T)[2:3]
 
-resultado <- segrega.cdv(erros)
-dados <- calcula.cdv(resultado,Metrô)
+erros %>%
+  group_by(solicitacao) %>%
+  summary()
+erros %>%
+  filter(cdv=="2N11T")
+str()
 calcula_reta_simples(dados$`1N01T`[1])
-Metrô %>% filter(is.na(tempo_abertura) & is.na(tempo_encerramento)) %>% select("tempo_abertura","tempo_encerramento")
 
-Metrô %>%filter(!(is.na(tempo_abertura) &is.na(tempo_encerramento)) &
-                  (is.na(tempo_abertura)|is.na(tempo_encerramento) ))%>%select("tempo_abertura","tempo_encerramento")
-
-Metrô %>% filter(solicitacao=="000002") %>% mutate(solicitacao=2,solicitacao=ifelse(solicitacao==2,50,20)) %>% select(solicitacao)
-
-
-with open('output.csv','w') as out:
-for row in data:
-for col in row:
-out.write('{0};'.format(col))
-out.write('\n')
+erros %>% summary()

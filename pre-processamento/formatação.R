@@ -5,15 +5,16 @@ ler <- function(x){
     names(Metrô) <- c("solicitacao","localizacao","data_abertura","hora_abertura","data_falha","hora_falha","descricao","data_encerramento","hora_encerramento")
     #filtragem
 
-    return(Metrô %>%
+    Metrô <-Metrô %>%
                 filter(localizacao != "" & localizacao != "Bem/Localiz." & !is.na(localizacao)) %>%
                 mutate(tempo_abertura=strptime(paste(data_abertura, hora_abertura, sep = " "), "%m/%d/%Y %H:%M"),
                        tempo_falha=strptime(paste(data_falha, hora_falha, sep = " "), "%m/%d/%Y %H:%M"),
-                       tempo_encerramento=strptime(paste(data_encerramento, hora_encerramento, sep = " "), "%m/%d/%Y %H:%M"),
-                       tempo_duracao=tempo_encerramento-tempo_abertura,
-                       tempo_encerramento=ifelse(is.na(tempo_encerramento),mean(tempo_duracao,na.rm = T),tempo_encerramento)) %>%
-                select(c("solicitacao","localizacao","descricao","tempo_abertura","tempo_falha","tempo_encerramento","tempo_duracao"))
-    )
+                       tempo_encerramento=strptime(paste(data_encerramento, hora_encerramento, sep = " "), "%m/%d/%Y %H:%M")) %>%
+               select(c("solicitacao","localizacao","descricao","tempo_abertura","tempo_falha","tempo_encerramento"))
+    Metrô <-Metrô %>%
+                mutate(tempo_encerramento=ifelse(is.na(tempo_encerramento),tempo_abertura+median(tempo_encerramento-tempo_abertura, na.rm = T),tempo_encerramento)) %>%
+                mutate(tempo_duracao=duration(minute=as.integer(tempo_encerramento-tempo_abertura,units("minutes"))))
+    return(Metrô)
 }
 
 
@@ -25,7 +26,7 @@ cdvs <- function(x,a,b){
         "RECS" = list(
             c("1N01T","1S01T","1S02T","1S03T","1S04T","1S05T","1S06T","1S07T","1S08T","1S09T"),
             c("2N02T","2N01T","2S01T","2S02T","2S03T","2S04T","2S05T","2S06T","2S07T","2S08T","2S09T"),
-            c("3S01T","3S02T","3S03T","3S04T")),
+            c(),
         "NEV" = list(
             c("1N14T","1N13T","1N12T","1N11T","1N10T","1N09T","1N08T","1N07T","1N06T","1N05T","1N04T","1N03T","1N02T","1N01T","1S01T","1S02T","1S03T"),
             c("2N14T","2N13T","2N12T","2N11T","2N10T","2N09T","2N08T","2N07T","2N06T","2N05T","2N04T","2N03T","2N02T","2N01T","2S01T","2S02T","2S03T"),
@@ -35,9 +36,9 @@ cdvs <- function(x,a,b){
             c("2N13T","2N12T","2N11T","2N10T","2N09T","2N08T","2N07T","2N06T","2N05T","2N04T","2N03T","2N02T","2N01T"),
             c()),
         "HACK" = list(
-            c("1N01T","1S01T","1S02T","1S03T","1S04T","1S05T","1S06T","1S07T","1S08T","1S09T","1N14T","1N13T","1N12T","1N11T","1N10T","1N09T","1N08T","1N07T","1N06T","1N05T","1N04T","1N03T","1N02T","1N01T","1S01T","1S02T","1S03T","1N13T","1N12T","1N11T","1N10T","1N09T","1N08T","1N07T","1N06T","1N05T","1N04T","1N03T","1N02T","1N01T"),
-            c("2N02T","2N01T","2S01T","2S02T","2S03T","2S04T","2S05T","2S06T","2S07T","2S08T","2S09T","2N14T","2N13T","2N12T","2N11T","2N10T","2N09T","2N08T","2N07T","2N06T","2N05T","2N04T","2N03T","2N02T","2N01T","2S01T","2S02T","2N13T","2N12T","2N11T","2N10T","2N09T","2N08T","2N07T","2N06T","2N05T","2N04T","2N03T","2N02T","2N01T"),
-            c("3S01T","3S02T","3S03T","3S04T","3N03T","3S02T","3S01T")
+            c("1S08T","1N01T", "1S01T", "1S02T", "1S03T", "1S04T", "1S05T", "1S06T", "1S07T", "1S09T", "1N14T", "1N13T", "1N12T", "1N11T", "1N10T", "1N09T", "1N08T", "1N07T", "1N06T", "1N05T", "1N04T", "1N03T", "1N02T"),
+            c("2S08T","2N01T", "2S01T", "2S02T", "2S03T", "2S04T", "2S05T", "2S06T", "1S07T","2S09T", "2N14T", "2N13T", "2N12T", "2N12T", "2N20T", "2N09T", "2N08T", "2N07T", "2N06T", "2N05T", "2N04T", "2N03T", "2N02T"),
+            c())
         )
         
     )
@@ -77,7 +78,6 @@ estacao <- function(x){
 }
 CMTS <- c("RECS","NEV","CAJ")
 
-escreve
 
 
 save(ler,file = ".\\..\\funcoes\\ler.RData")

@@ -30,22 +30,7 @@ conjura <- function(dados){
             }
         }
     }
-    df$x <- 1:nrow(df)
-    return(df %>%
-             spread(key = "cdv",value = "solicitacao") %>%
-             select(noquote(order(colnames(df))))
-    )
-}
-erro.cdvs <- function(erros){
-    x <- list()
-    1 -> n
-    for(i in 1:length(erros$Cdvs)){
-        if(cdv %in% erros$Cdvs[[i]]){
-            x[n] <- list(erros$Desc[[i]])
-            n+1 -> n
-        }
-    }
-    return(x[-c(1)])
+    return(df)
 }
 
 save(list = c("magia_negra","conjura","erro.cdvs"), file = "funcoes/magia.RData")
