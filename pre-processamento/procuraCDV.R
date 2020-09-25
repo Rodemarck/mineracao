@@ -1,16 +1,14 @@
 magia_negra <- function(descricao, cmt="HACK"){
-    print("*")
     if(is.null(descricao)){
         return(NULL)
     }
     d <- str_replace_all(descricao,pattern = "\\s+",replacement = "")
     ids <- str_extract_all(string = d,pattern="[1-3](\\-|\\.|\\:|\\;|\\,)*[S|N](\\-|\\.|\\:|\\;|\\,)*[01](\\-|\\.|\\:|\\;|\\,)?[0-9](\\-|\\.|\\:|\\;|\\,)?($|T$|T[^T])")
-    print(ids)
     return(ids[[1]])
 }
 conjura <- function(dados){
-    cdvs <- list()
-    desc <- list()
+    df <- data.frame(solicitacao=character(),cdv=character())
+
     k <- 1
     for(i in 1:nrow(dados)){
         aux <- magia_negra(dados$descricao[i])
@@ -25,13 +23,18 @@ conjura <- function(dados){
                 a <- str_replace_all(a,"(\\.|\\,|\\-|\\:|\\;)","")
                 x <- c(x,a)
             }
-            cdvs[k] <- list(cdvs=x)
-            desc[k] <- list(dados[i,])
-            
-            k+1 -> k
+            for(cdv in x){
+                df[k,] <- c(dados$solicitacao[i],cdv)
+
+                k+1 -> k
+            }
         }
     }
-    return(list(Cdvs=cdvs, Desc=desc))
+    df$x <- 1:nrow(df)
+    return(df %>%
+             spread(key = "cdv",value = "solicitacao") %>%
+             select(noquote(order(colnames(df))))
+    )
 }
 erro.cdvs <- function(erros){
     x <- list()
@@ -42,7 +45,7 @@ erro.cdvs <- function(erros){
             n+1 -> n
         }
     }
-    return(x)
+    return(x[-c(1)])
 }
 
 save(list = c("magia_negra","conjura","erro.cdvs"), file = "funcoes/magia.RData")

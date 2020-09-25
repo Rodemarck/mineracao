@@ -1,7 +1,8 @@
-# Title     : TODO
-# Objective : TODO
-# Created by: rodemarck
-# Created on: 13/09/2020
+#' Divide os as solicitações relatorios de erros de acordo com
+#' os cdvs
+#'
+#' @author Rodemarck
+#' @param erros lista contendo
 segrega.cdv <- function(erros){
     df <- list()
     for(i in 1:length(erros$Cdvs)){
@@ -26,7 +27,7 @@ calcula.cdv <- function(resultados, Metrô){
                         Metrô$tempo_abertura[which(Metrô$solicitacao == resultado[[r]][[i]])]
                         - Metrô$tempo_encerramento[which(Metrô$solicitacao == resultado[[r]][[i-1]])]))
             }
-            df[[r]] <- list(MTTR=mean(tr),MTTF=mean(tf))
+            df[[r]] <- list(Tr=tr,Tf=tf)
         }
     }
     return(df)
