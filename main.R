@@ -1,50 +1,110 @@
 rm(list = ls())
+library(dygraphs)
 library("stringr")
 library("tuple")
 library("rlang")
 library("ggplot2")
 library("dplyr")
 library("tidyr")
+install.packages("lubridate", dependencies = T)
 library("lubridate")
-
-options(max.print=.Machine$integer.max)
+library("pwt8")
 
 for(f in list.files("funcoes")){
-  load(paste0("funcoes/",f))
+    load(paste0("funcoes/",f))
 }
 
 rm(f)
 #' lendo e processessando dados
-#Metrô <- ler("METROREC.csv")
+#Metrô <- ler2("METROREC.csv")
 
 #' escrevendo tabela completa tratada
 #write.csv(Metrô, file = "metro_rec_tratado.csv")
 
 #' lendo dados processados
-Metrô <- read.csv(file = "metro_rec_tratado.csv")[2:8]%>%
-  mutate(tempo_abertura=strptime(tempo_abertura, "%Y-%m-%d %H:%M:%S"),
-         tempo_falha=strptime(tempo_falha,  "%Y-%m-%d %H:%M:%S"),
-         tempo_encerramento=strptime(tempo_encerramento,  "%Y-%m-%d %H:%M:%S"),
-         t_d=tempo_duracao) %>%
-  select(c("solicitacao","localizacao","descricao","tempo_abertura","tempo_falha","tempo_encerramento","t_d")) %>%
-  mutate(tempo_duracao=duration(minute=t_d)) %>%
-  select(-c("t_d"))
+#Metrô <- read.csv(file = "metro_rec_tratado.csv")[2:9]%>%
+#    mutate(tempo_abertura=strptime(tempo_abertura, "%Y-%m-%d %H:%M:%S"),
+#           tempo_falha=strptime(tempo_falha,  "%Y-%m-%d %H:%M:%S"),
+#           tempo_encerramento=strptime(tempo_encerramento,  "%Y-%m-%d %H:%M:%S"),
+#           t_d=tempo_duracao) %>%
+#    select(-c("tempo_duracao")) %>%
+#    mutate(tempo_duracao=duration(minute=t_d)) %>%
+#    select(-c("t_d"))
+
+
 #' procurando erros dos cdvs
 #erros <- conjura(Metrô)
-#erros <- merge(Metrô,erros)
+#erros_completos <- Metrô %>% merge(erros, by = "solicitacao") %>%
+#    mutate(cdv=factor(cdv))
 
-#' escrevendo erros dos cdvs
-#write.csv(erros, file = "erros_cdv.csv")
+#' escrevendo erros_completos
+#write.csv(erros_completos,file = "metro_tratado.csv")
 
-#' lendo erros dos cdvs
-erros <- read.csv(file = "erros_cdv.csv",stringsAsFactors = T)[2:3]
+#' lendo erros_completos
+primeira_palavra <- function(vetor){
+    tempo <- NULL
+    for(i in vetor){
+        tempo <- c(tempo, strsplit(i," ")[[1]][1])
+    }
+    return(tempo)
+}
+Metrô <- read.csv(file = "metro_tratado.csv",)[2:10]%>%
+    mutate(tempo_abertura=strptime(tempo_abertura, "%Y-%m-%d %H:%M:%S"),
+           tempo_falha=strptime(tempo_falha,  "%Y-%m-%d %H:%M:%S"),
+           tempo_encerramento=strptime(tempo_encerramento,  "%Y-%m-%d %H:%M:%S"),
+           tempo_duracao=duration(primeira_palavra(tempo_duracao))
+    )
+Metrô_tratado %>%
+    filter(tempo_abertura$year==113)
+Metrô_tratado$tempo_abertura[1]$year
+filtra.ano <- function(vetor, ano){
+    resp <- NULL
+    for(i in vetor){
+        resp <-c(resp,i$year)
+    }
+}
+a <- "cmt"
+Metrô_tratado[[a]][1]
+str(Metrô_tratado$tempo_abertura[1])
+Metrô_tratado %>% select(cdv)
+timeS <- Metrô_tratado %>%
+    filtra(cdv = "2N03T")
 
-erros %>%
-  group_by(solicitacao) %>%
-  summary()
-erros %>%
-  filter(cdv=="2N11T")
-str()
-calcula_reta_simples(dados$`1N01T`[1])
+d1 <- min(Metrô$tempo_abertura)
+d2 <- max(Metrô$tempo_abertura)
 
-erros %>% summary()
+for (i in seq(d1,d2,by = "day")){
+    a<-Metrô %>%
+        filter(tempo_abertura == as.POSIXlt(i, origin = "1970-01-01")) %>%
+        select(.)
+    print(a)
+}
+x <- seq(d1,d2,by = "day")[[1]]
+xx<- as.POSIXlt(x, origin = "1970-01-01")
+
+mesmo.dia <- function(.data, dia){
+    .data %>%
+        filter(tempo_abertura$year == dia$year & tempo_abertura$yday == dia$yday)
+}
+Metrô %>%
+    mesmo.dia(xx)
+xx
+
+
+interval()
+timeRange(timeS$tempo_abertura, timeS$tempo_duracao)
+dat$time
+a <- seq(as.Date(min(Metrô_tratado$tempo_abertura)),as.Date(max(Metrô_tratado$tempo_abertura)),by="days")[1]
+Metrô_tratado %>%
+    group_by(tempo_abertura$year)%>%
+    count(tempo_abertura)
+gb$tempo_abertura
+Metrô_tratado$tempo_abertura[which(Metrô_tratado$tempo_abertura == "2013-06-15")]
+energy$Date <- as.Date(energy$Datetime)
+aggregate(Metrô_tratado, by=Metrô_tratado, c)
+
+round.Date(Metrô_tratado$tempo_abertura, "day")
+Metrô_tratado$tempo_abertura[which(Metrô_tratado$tempo_abertura == "2013-06-15")]
+a <- as.POSIXlt(a)
+Metrô_tratado$tempo_abertura[which(Metrô_tratado$tempo_abertura == a)]
+Metrô$

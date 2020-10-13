@@ -32,4 +32,29 @@ calcula.cdv <- function(resultados, Metrô){
     }
     return(df)
 }
-save(list = c("segrega.cdv","calcula.cdv"), file = "funcoes/processamento.RData")
+filtra.cdv <- function(.data, cdv=NA){
+    resultado <- NULL
+    for(i in .data$cdv){
+        resultado <- c(resultado, grepl(paste0(".*",cdv,".*"),i))
+    }
+    return(.data %>% filter(resultado))
+}
+series.temporais <- function (.data){
+    st <- data.frame("quantidade","solicitacoes", stringsAsFactors = F)
+    mesmo.dia <- function(.data, dia){
+        .data %>%
+            filter(tempo_abertura$year == dia$year & tempo_abertura$yday == dia$yday)
+    }
+    d1 <- min(.data$tempo_abertura)
+    d2 <- max(.data$tempo_abertura)
+    k <- 1
+    for (i in seq(d1,d2,by = "day")){
+        a<-Metrô %>%
+            filter(tempo_abertura == as.POSIXlt(i, origin = "1970-01-01"))
+        if(nrow(a) ==0){
+        
+        }
+    }
+}
+
+save(list = c("segrega.cdv","calcula.cdv","filtra.cdv"), file = "funcoes/processamento.RData")

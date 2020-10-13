@@ -1,22 +1,64 @@
+get_cmt <- function(e){
+    aux <- NULL
+    for(i in e){
+        aux2 <- NA
+        for(es in ESTACOES){
+            if(grepl(paste0(".*",es,".*"),i)){
+                aux2 <- cmt(es)
+            }
+        }
+        aux <- c(aux,aux2)
+    }
+    return(aux)
+}
+
 #leitura e formatacao inicial
 ler <- function(x){
     Metrô <- as.data.frame(read.csv(x, check.names = F))
-    #nomeando colunas
+    #'procurando cm
+    
+    #'nomeando colunas
     names(Metrô) <- c("solicitacao","localizacao","data_abertura","hora_abertura","data_falha","hora_falha","descricao","data_encerramento","hora_encerramento")
-    #filtragem
-
+    #' correção de datas
     Metrô <-Metrô %>%
                 filter(localizacao != "" & localizacao != "Bem/Localiz." & !is.na(localizacao)) %>%
                 mutate(tempo_abertura=strptime(paste(data_abertura, hora_abertura, sep = " "), "%m/%d/%Y %H:%M"),
                        tempo_falha=strptime(paste(data_falha, hora_falha, sep = " "), "%m/%d/%Y %H:%M"),
-                       tempo_encerramento=strptime(paste(data_encerramento, hora_encerramento, sep = " "), "%m/%d/%Y %H:%M")) %>%
-               select(c("solicitacao","localizacao","descricao","tempo_abertura","tempo_falha","tempo_encerramento"))
+                       tempo_encerramento=strptime(paste(data_encerramento, hora_encerramento, sep = " "), "%m/%d/%Y %H:%M"),
+                       cmt=get_cmt(localizacao)) %>%
+               select(c("solicitacao","localizacao","cmt","descricao","tempo_abertura","tempo_falha","tempo_encerramento"))
     Metrô <-Metrô %>%
-                mutate(tempo_encerramento=ifelse(is.na(tempo_encerramento),tempo_abertura+median(tempo_encerramento-tempo_abertura, na.rm = T),tempo_encerramento)) %>%
-                mutate(tempo_duracao=duration(minute=as.integer(tempo_encerramento-tempo_abertura,units("minutes"))))
+        mutate(tempo_encerramento=ifelse(is.na(tempo_encerramento),as.POSIXlt(tempo_abertura + median(tempo_encerramento-tempo_abertura, na.rm = T)),tempo_encerramento))
+    str(Metrô)
+    Metrô <-Metrô %>%
+        mutate(tempo_duracao=duration(minute = as.numeric(tempo_encerramento - tempo_abertura)))
     return(Metrô)
 }
 
+ler2<-function(x){
+    Metrô <- as.data.frame(read.csv(x, check.names = F))
+    #nomeando colunas
+    names(Metrô) <- c("solicitacao","localizacao","data_abertura","hora_abertura","data_falha","hora_falha","descricao","data_encerramento","hora_encerramento")
+    #filtragem
+    Metrô <- Metrô %>%
+            filter(localizacao != ""
+                   & solicitacao != "Solicitacao"
+                   & data_abertura != "/  /"
+                   & data_encerramento != "/  /"
+                   & data_falha != "/  /"
+                   & hora_abertura != ":"
+                   & hora_encerramento != ":"
+                   & hora_falha != ":") %>%
+            mutate(tempo_abertura=strptime(paste(data_abertura, hora_abertura, sep = " "), "%m/%d/%Y %H:%M"),
+                   tempo_falha=strptime(paste(data_falha, hora_falha, sep = " "), "%m/%d/%Y %H:%M"),
+                   tempo_encerramento=strptime(paste(data_encerramento, hora_encerramento, sep = " "), "%m/%d/%Y %H:%M"),
+                   cmt=get_cmt(localizacao),
+                   descricao=str_replace_all(descricao,pattern = "\\s+",replacement = " ")) %>%
+            mutate(tempo_duracao=tempo_encerramento - tempo_abertura) %>%
+            select(-c("data_abertura","data_encerramento","data_falha","hora_abertura","hora_encerramento","hora_falha"))
+    
+    return(Metrô)
+}
 
 cdvs <- function(x,a,b){
     if(!x %in% c("RECS","NEV","CAJ")){
@@ -82,3 +124,5 @@ CMTS <- c("RECS","NEV","CAJ")
 
 save(ler,file = ".\\..\\funcoes\\ler.RData")
 save(list =c("cdvs","CMTS","cmt","ESTACOES","estacao"), file = ".\\..\\funcoes\\constantes.RData")
+
+

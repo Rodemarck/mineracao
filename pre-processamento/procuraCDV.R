@@ -2,7 +2,7 @@ magia_negra <- function(descricao, cmt="HACK"){
     if(is.null(descricao)){
         return(NULL)
     }
-    d <- str_replace_all(descricao,pattern = "\\s+",replacement = "")
+    d <- str_replace_all(descricao,pattern = "\\s+|\\n",replacement = "")
     ids <- str_extract_all(string = d,pattern="[1-3](\\-|\\.|\\:|\\;|\\,)*[S|N](\\-|\\.|\\:|\\;|\\,)*[01](\\-|\\.|\\:|\\;|\\,)?[0-9](\\-|\\.|\\:|\\;|\\,)?($|T$|T[^T])")
     return(ids[[1]])
 }
@@ -23,10 +23,11 @@ conjura <- function(dados){
                 a <- str_replace_all(a,"(\\.|\\,|\\-|\\:|\\;)","")
                 x <- c(x,a)
             }
+            df[k,] <- c(dados$solicitacao[i],paste(x,collapse = "-"))
+    
+            k+1 -> k
             for(cdv in x){
-                df[k,] <- c(dados$solicitacao[i],cdv)
-
-                k+1 -> k
+            
             }
         }
     }
