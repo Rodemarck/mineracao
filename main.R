@@ -6,7 +6,6 @@ library("rlang")
 library("ggplot2")
 library("dplyr")
 library("tidyr")
-install.packages("lubridate", dependencies = T)
 library("lubridate")
 library("pwt8")
 
@@ -86,9 +85,7 @@ mesmo.dia <- function(.data, dia){
     .data %>%
         filter(tempo_abertura$year == dia$year & tempo_abertura$yday == dia$yday)
 }
-Metrô %>%
-    mesmo.dia(xx)
-xx
+
 
 
 interval()
@@ -107,4 +104,30 @@ round.Date(Metrô_tratado$tempo_abertura, "day")
 Metrô_tratado$tempo_abertura[which(Metrô_tratado$tempo_abertura == "2013-06-15")]
 a <- as.POSIXlt(a)
 Metrô_tratado$tempo_abertura[which(Metrô_tratado$tempo_abertura == a)]
-Metrô$
+
+x <- c(NA,2,NA,3,4,NA,NA,5,6,7,8,9,10,11,12,13,14)
+k <- ts(x)
+
+kei <- function(.data, cdv=NULL){
+    if(is.null(cdv)){
+        series.temporais(Metrô)
+    }else{
+        series.temporais(Metrô %>%
+            filtra.cdv(cdv)
+        )
+    }
+}
+f <- function(cdv = NULL){
+    k <- Metrô %>% kei(cdv)
+    print()
+    serie1 <-ts(k$Qnt, start = c(2013,6,15), freq=365)
+    plot(serie1, ylab = "quantidade", xlab = "data da ocorrencia")
+}
+
+
+
+
+
+f(c("2N09T"))
+
+

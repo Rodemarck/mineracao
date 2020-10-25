@@ -35,26 +35,43 @@ calcula.cdv <- function(resultados, Metrô){
 filtra.cdv <- function(.data, cdv=NA){
     resultado <- NULL
     for(i in .data$cdv){
-        resultado <- c(resultado, grepl(paste0(".*",cdv,".*"),i))
+        resultado <- c(resultado, grepl(paste0(".*(",paste(cdv,collapse = "|"),").*"),i))
     }
     return(.data %>% filter(resultado))
 }
+mesmo.dia <- function(.data, dia){
+    .data %>%
+        filter(tempo_abertura$year == dia$year & tempo_abertura$yday == dia$yday)
+}
 series.temporais <- function (.data){
-    st <- data.frame("quantidade","solicitacoes", stringsAsFactors = F)
-    mesmo.dia <- function(.data, dia){
-        .data %>%
-            filter(tempo_abertura$year == dia$year & tempo_abertura$yday == dia$yday)
-    }
+    print(nrow(.data))
+    #st <- data.frame("quantidade"=numeric(),"solicitacoes"=character(), stringsAsFactors = F)
+    qt <- NULL
+    st <- NULL
     d1 <- min(.data$tempo_abertura)
     d2 <- max(.data$tempo_abertura)
     k <- 1
     for (i in seq(d1,d2,by = "day")){
         a<-Metrô %>%
-            filter(tempo_abertura == as.POSIXlt(i, origin = "1970-01-01"))
-        if(nrow(a) ==0){
-        
+            mesmo.dia(dia=as.POSIXlt(i, origin = "1970-01-01"))
+        if(nrow(a) !=0){
+            soli <- a %>%
+                select(solicitacao)
+            n <-nrow(a)
+            soli <- unlist(soli)
+            soli <- unique(soli)
+            a <- paste(soli,collapse = "-")
+            qt <- c(qt,as.character(n))
+            st <- c(st,as.character(a))
         }
+        else{
+            qt <- c(qt, NA)
+            st <- c(st, NA)
+        }
+        
+        k+1 -> k
     }
+    return(data.frame("Qnt"=qt, "Soli"=st, stringsAsFactors = F))
 }
 
-save(list = c("segrega.cdv","calcula.cdv","filtra.cdv"), file = "funcoes/processamento.RData")
+save(list = c("segrega.cdv","calcula.cdv","filtra.cdv","series.temporais","mesmo.dia"), file = "funcoes/processamento.RData")
